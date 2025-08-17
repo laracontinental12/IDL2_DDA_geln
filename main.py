@@ -63,18 +63,27 @@ with st.form("form-producto", clear_on_submit=True):
 
 if submitted:
     try:
-        # Validar los datos
-        nombre_v, precio_v, categorias_v, en_venta_v = validate(nombre, precio, categorias, en_venta_label)
+        ensure_dir()
+        nombre_val, precio_val, categorias_val, en_venta_val = validate(
+            nombre, precio, categorias, en_venta_label
+        )
 
-        # Cargar dataframe existente
         df = load_df()
-
-        # Agregar nuevo producto
         nuevo = {
-            "nombre": nombre_v,
-            "precio": precio_v,
-            "categorias": ";".join(categorias_v),  # guardar como string
-            "en_venta": en_venta_v,
-            "ts": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "nombre": nombre_val,
+            "precio": precio_val,
+            "categorias": ";".join(categorias_val),  # se guarda como string
+            "en_venta": en_venta_val,
+            "ts": datetime.now().isoformat()
         }
+
         df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
+        df.to_csv(CSV_PATH, index=False, encoding="utf-8")
+
+        st.success("✅ Producto guardado correctamente")
+
+    except ValueError as e:
+        st.error(f"⚠️ Error de validación: {e}")
+
+    except Exception as e:
+        st.error(f"❌ Error inesperado: {e}")
