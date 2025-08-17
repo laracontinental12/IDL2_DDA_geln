@@ -30,7 +30,7 @@ def validate(nombre: str, precio, categorias: list, en_venta_label: str):
     try:
         p = float(precio)
     except Exception:
-        raise ValueError("Por favor verifique en campo precio")
+        raise ValueError("Por favor verifique el campo precio")
     if not (0 < p < 999):
         raise ValueError("El precio debe ser mayor a 0 y menor a 999.")
     
@@ -60,3 +60,21 @@ with st.form("form-producto", clear_on_submit=True):
     en_venta_label = st.radio("¿El producto está en venta?", options=["Sí", "No"], horizontal=True)
 
     submitted = st.form_submit_button("Guardar")
+
+if submitted:
+    try:
+        # Validar los datos
+        nombre_v, precio_v, categorias_v, en_venta_v = validate(nombre, precio, categorias, en_venta_label)
+
+        # Cargar dataframe existente
+        df = load_df()
+
+        # Agregar nuevo producto
+        nuevo = {
+            "nombre": nombre_v,
+            "precio": precio_v,
+            "categorias": ";".join(categorias_v),  # guardar como string
+            "en_venta": en_venta_v,
+            "ts": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
